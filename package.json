@@ -27,21 +27,6 @@
     "@neon/env": "^1.4.4",
     "@prisma/adapter-pg": "^7.10.0",
     "@prisma/client": "^7.10.0",
-    "bcrypt": "^6.0.0",
-    "cloudinary": "^2.11.0",
-    "cookie-parser": "^1.4.7",
-    "cors": "^2.8.6",
-    "dotenv": "^17.4.2",
-    "express": "^5.2.1",
-    "express-rate-limit": "^8.7.0",
-    "helmet": "^8.3.0",
-    "jsonwebtoken": "^9.0.3",
-    "multer": "^2.4.0",
-    "pg": "^8.23.0",
-    "prisma": "^7.10.0",
-    "zod": "^4.6.2"
-  },
-  "devDependencies": {
     "@types/bcrypt": "^6.0.0",
     "@types/cookie-parser": "^1.4.10",
     "@types/cors": "^2.8.19",
@@ -49,9 +34,25 @@
     "@types/jsonwebtoken": "^9.0.10",
     "@types/multer": "^2.2.0",
     "@types/node": "^22.20.2",
+    "bcrypt": "^6.0.0",
+    "cloudinary": "^2.11.0",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
     "esbuild": "^0.25.0",
-    "tsx": "^4.23.15",
-    "typescript": "^7.0.2"
+    "express": "^5.2.1",
+    "express-rate-limit": "^8.7.0",
+    "helmet": "^8.3.0",
+    "jsonwebtoken": "^9.0.3",
+    "multer": "^2.4.0",
+    "pg": "^8.23.0",
+    "prisma": "^7.10.0",
+    "typescript": "^5.8.2",
+    "zod": "^4.6.2"
+  },
+  "devDependencies": {
+    "tsx": "^4.23.15"
   }
 }
+
 
