@@ -15,11 +15,12 @@
   },
   "include": [
     "src",
-    "prisma",
-    "scripts"
+    "api"
   ],
   "exclude": [
     "node_modules",
-    "dist"
+    "dist",
+    "scripts",
+    "prisma"
   ]
 }

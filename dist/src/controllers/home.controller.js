@@ -1,11 +1,7 @@
-import "dotenv/config";
-import { PrismaPg } from "@prisma/adapter-pg";
-import { PrismaClient } from "../generated/prisma/client.js";
-const prisma = new PrismaClient({
-    adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL }),
-});
+import { prisma } from "../lib/prisma.js";
 export const getHomeData = async (_req, res) => {
     try {
+        const started = performance.now();
         const [categories, bestSellers, videos] = await Promise.all([
             prisma.category.findMany({
                 where: { isActive: true },
@@ -30,11 +26,16 @@ export const getHomeData = async (_req, res) => {
                 orderBy: { displayOrder: "asc" },
             }),
             prisma.video.findMany({
-                where: { isActive: true },
+                where: {
+                    isActive: true,
+                    isShow: true,
+                },
                 select: { videoUrl: true, publicId: true },
                 orderBy: { displayOrder: "asc" },
+                take: 6,
             }),
         ]);
+        console.log(`[home] db=${Math.round(performance.now() - started)}ms`);
         return res.status(200).json({
             success: true,
             data: {

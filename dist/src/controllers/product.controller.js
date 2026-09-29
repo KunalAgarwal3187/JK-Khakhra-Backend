@@ -1,8 +1,4 @@
-import "dotenv/config";
-import { PrismaPg } from "@prisma/adapter-pg";
-import { PrismaClient } from "../generated/prisma/client.js";
-const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
-const prisma = new PrismaClient({ adapter });
+import { prisma } from "../lib/prisma.js";
 export const getBestSellers = async (_req, res) => {
     try {
         const products = await prisma.product.findMany({
@@ -36,9 +32,9 @@ export const getProductBySlug = async (req, res) => {
                 message: "Product slug is required",
             });
         }
+        const started = performance.now();
         const product = await prisma.product.findUnique({
             where: { slug },
-            include: { category: { select: { name: true, slug: true, image: true } } },
         });
         if (!product || !product.isActive) {
             return res.status(404).json({
@@ -46,22 +42,32 @@ export const getProductBySlug = async (req, res) => {
                 message: "Product not found",
             });
         }
-        const { category, ...productWithoutCategory } = product;
-        const [relatedProducts, relatedCategories] = await Promise.all([
+        const [category, relatedProducts, relatedCategories] = await Promise.all([
+            prisma.category.findUnique({
+                where: { id: product.categoryId },
+                select: { name: true, slug: true, image: true },
+            }),
             prisma.product.findMany({
                 where: { categoryId: product.categoryId, isActive: true, id: { not: product.id } },
                 select: { name: true, slug: true, image: true, weight: true },
             }),
             prisma.category.findMany({
-                where: { isActive: true, slug: { not: category.slug } },
+                where: { isActive: true, id: { not: product.categoryId } },
                 select: { name: true, slug: true, image: true },
             }),
         ]);
+        if (!category) {
+            return res.status(404).json({
+                success: false,
+                message: "Product not found",
+            });
+        }
         const randomItems = (items, count) => items.sort(() => Math.random() - 0.5).slice(0, count);
+        console.log(`[product/${slug}] db=${Math.round(performance.now() - started)}ms`);
         return res.status(200).json({
             success: true,
             data: {
-                product: productWithoutCategory,
+                product,
                 category,
                 relatedProducts: randomItems(relatedProducts, 4),
                 relatedCategories: randomItems(relatedCategories, 5),

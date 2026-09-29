@@ -116,6 +116,7 @@ export const VideoScalarFieldEnum = {
     publicId: 'publicId',
     displayOrder: 'displayOrder',
     isActive: 'isActive',
+    isShow: 'isShow',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
 };

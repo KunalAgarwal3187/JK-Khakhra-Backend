@@ -1,8 +1,4 @@
-import "dotenv/config";
-import { PrismaPg } from "@prisma/adapter-pg";
-import { PrismaClient } from "../generated/prisma/client.js";
-const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
-const prisma = new PrismaClient({ adapter });
+import { prisma } from "../lib/prisma.js";
 export const getCategories = async (_req, res) => {
     try {
         const categories = await prisma.category.findMany({
@@ -54,7 +50,8 @@ export const getCategoryBySlug = async (req, res) => {
                 inquiries: true,
             },
         });
-        if (!category) {
+        // Public storefront must only expose active categories (BRD §12 Consistency)
+        if (!category || !category.isActive) {
             return res.status(404).json({
                 success: false,
                 message: "Category not found",

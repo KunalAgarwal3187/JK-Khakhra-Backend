@@ -49,7 +49,9 @@
     "@types/jsonwebtoken": "^9.0.10",
     "@types/multer": "^2.2.0",
     "@types/node": "^22.20.2",
+    "esbuild": "^0.25.0",
     "tsx": "^4.23.15",
     "typescript": "^7.0.2"
   }
 }
+
