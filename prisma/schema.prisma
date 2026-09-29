@@ -1,0 +1,250 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id           Int       @id @default(autoincrement())
+  name         String
+  email        String    @unique
+  phone        String?
+  passwordHash String
+  role         UserRole  @default(CUSTOMER)
+  isActive     Boolean   @default(true)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  addresses    Address[]
+  cart         Cart?
+  inquiries    Inquiry[]
+  orders       Order[]
+}
+
+model Category {
+  id           Int       @id @default(autoincrement())
+  name         String
+  slug         String    @unique
+  image        String?
+  isActive     Boolean   @default(true)
+  displayOrder Int       @default(0)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  inquiries    Inquiry[]
+  products     Product[]
+}
+
+model Video {
+  id           Int      @id @default(autoincrement())
+  videoUrl     String
+  publicId     String   @unique
+  displayOrder Int      @default(0)
+  isActive     Boolean  @default(true)
+  isShow       Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([isActive, displayOrder])
+  @@index([isShow, displayOrder])
+}
+
+model Product {
+  id               Int         @id @default(autoincrement())
+  categoryId       Int
+  name             String
+  slug             String      @unique
+  shortDescription String?
+  tagline          String?
+  description      String?
+  image            String?
+  ingredients      String?
+  weight           String?
+  foodType         String?
+  shelfLife        String?
+  benefits         Json?
+  nutrition        Json?
+  price            Decimal     @db.Decimal(10, 2)
+  stock            Int         @default(0)
+  isBestSeller     Boolean     @default(false)
+  isActive         Boolean     @default(true)
+  displayOrder     Int         @default(0)
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+  cartItems        CartItem[]
+  inquiries        Inquiry[]
+  orderItems       OrderItem[]
+  category         Category    @relation(fields: [categoryId], references: [id])
+
+  @@index([categoryId])
+  @@index([isActive])
+}
+
+model Address {
+  id           Int      @id @default(autoincrement())
+  userId       Int
+  fullName     String
+  phone        String
+  addressLine1 String
+  addressLine2 String?
+  city         String
+  state        String
+  pincode      String
+  country      String   @default("India")
+  landmark     String?
+  addressType  String?
+  isDefault    Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model Cart {
+  id        Int        @id @default(autoincrement())
+  userId    Int        @unique
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  user      User       @relation(fields: [userId], references: [id])
+  items     CartItem[]
+}
+
+model CartItem {
+  id        Int     @id @default(autoincrement())
+  cartId    Int
+  productId Int
+  quantity  Int
+  cart      Cart    @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  product   Product @relation(fields: [productId], references: [id])
+
+  @@unique([cartId, productId])
+  @@index([productId])
+}
+
+model Coupon {
+  id                 Int          @id @default(autoincrement())
+  code               String       @unique
+  discountType       DiscountType
+  discountValue      Decimal      @db.Decimal(10, 2)
+  minimumOrderAmount Decimal?     @db.Decimal(10, 2)
+  maximumDiscount    Decimal?     @db.Decimal(10, 2)
+  usageLimit         Int?
+  usedCount          Int          @default(0)
+  startDate          DateTime
+  expiryDate         DateTime
+  isActive           Boolean      @default(true)
+  createdAt          DateTime     @default(now())
+  updatedAt          DateTime     @updatedAt
+  orders             Order[]
+}
+
+model Order {
+  id              Int           @id @default(autoincrement())
+  orderNumber     String        @unique
+  userId          Int
+  couponId        Int?
+  couponCode      String?
+  subtotal        Decimal       @db.Decimal(10, 2)
+  shippingFee     Decimal       @db.Decimal(10, 2)
+  taxAmount       Decimal       @db.Decimal(10, 2)
+  totalAmount     Decimal       @db.Decimal(10, 2)
+  discounts       Json?
+  shippingAddress Json
+  paymentStatus   PaymentStatus @default(PENDING)
+  orderStatus     OrderStatus   @default(PENDING)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  coupon          Coupon?       @relation(fields: [couponId], references: [id])
+  user            User          @relation(fields: [userId], references: [id])
+  items           OrderItem[]
+  payments        Payment[]
+
+  @@index([userId])
+  @@index([paymentStatus])
+  @@index([orderStatus])
+}
+
+model OrderItem {
+  id          Int     @id @default(autoincrement())
+  orderId     Int
+  productId   Int
+  productName String
+  unitPrice   Decimal @db.Decimal(10, 2)
+  quantity    Int
+  order       Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product     Product @relation(fields: [productId], references: [id])
+
+  @@index([productId])
+}
+
+model Payment {
+  id                Int           @id @default(autoincrement())
+  orderId           Int
+  provider          String
+  providerOrderId   String?
+  providerPaymentId String?
+  amount            Decimal       @db.Decimal(10, 2)
+  currency          String        @default("INR")
+  status            PaymentStatus @default(PENDING)
+  paidAt            DateTime?
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+  order             Order         @relation(fields: [orderId], references: [id])
+
+  @@index([orderId])
+  @@index([providerOrderId])
+}
+
+model Inquiry {
+  id          Int       @id @default(autoincrement())
+  name        String
+  phone       String
+  email       String?
+  productId   Int?
+  categoryId  Int?
+  inquiryType String
+  status      String    @default("NEW")
+  source      String?
+  message     String
+  userId      Int?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  category    Category? @relation(fields: [categoryId], references: [id])
+  product     Product?  @relation(fields: [productId], references: [id])
+  user        User?     @relation(fields: [userId], references: [id])
+
+  @@index([productId])
+  @@index([categoryId])
+  @@index([userId])
+  @@index([status])
+}
+
+enum UserRole {
+  CUSTOMER
+  DISTRIBUTOR
+  ADMIN
+}
+
+enum DiscountType {
+  PERCENTAGE
+  FIXED
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+  EXPIRED
+}
