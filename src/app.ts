@@ -1,17 +1,13 @@
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
-import { createRequire } from "node:module";
-import type { RequestHandler } from "express";
+import helmet from "helmet";
 import categoryRoutes from "./routes/category.routes.js";
 import productRoutes from "./routes/product.routes.js";
 import adminRoutes from "./routes/admin/index.js";
 import authRoutes from "./routes/auth.routes.js";
 import { getHomeData } from "./controllers/home.controller.js";
 import { isAllowedOrigin } from "./lib/cors.js";
-
-const require = createRequire(import.meta.url);
-const helmet = require("helmet") as (options?: Record<string, unknown>) => RequestHandler;
 
 const app = express();
 app.set("trust proxy", 1);
