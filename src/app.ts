@@ -1,7 +1,6 @@
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
-import { default as helmet } from "helmet";
 import categoryRoutes from "./routes/category.routes.js";
 import productRoutes from "./routes/product.routes.js";
 import adminRoutes from "./routes/admin/index.js";
@@ -11,12 +10,6 @@ import { isAllowedOrigin } from "./lib/cors.js";
 
 const app = express();
 app.set("trust proxy", 1);
-
-app.use(
-  helmet({
-    crossOriginResourcePolicy: { policy: "cross-origin" },
-  })
-);
 
 app.use(
   cors({
