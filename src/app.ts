@@ -1,7 +1,7 @@
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
-import helmet from "helmet";
+import { default as helmet } from "helmet";
 import categoryRoutes from "./routes/category.routes.js";
 import productRoutes from "./routes/product.routes.js";
 import adminRoutes from "./routes/admin/index.js";
